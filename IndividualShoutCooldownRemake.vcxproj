@@ -31,14 +31,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events.cpp" />
-    <ClCompile Include="src\Hooks.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Serialization.cpp" />
     <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Events.h" />
-    <ClInclude Include="include\Hooks.h" />
     <ClInclude Include="include\Serialization.h" />
     <ClInclude Include="include\Settings.h" />
     <ClInclude Include="include\version.h" />

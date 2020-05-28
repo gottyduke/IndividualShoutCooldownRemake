@@ -4,32 +4,37 @@
 #include "RE/Skyrim.h"
 
 
+namespace RE
+{
+	class TESObjectREFR;
+
+	struct TESSpellCastEvent
+	{
+		// members
+		NiPointer<TESObjectREFR>	caster;
+		FormID						spellID{};
+	};
+}
+
+
 namespace Events
 {
-	class ShoutCastHandler final :
-		public DKUtil::Template::SDM<ShoutCastHandler>,
-		public RE::BSTEventSink<RE::BSAnimationGraphEvent>
+	using EventResult = RE::BSEventNotifyControl;
+
+	class SpellHandler final :
+		public DKUtil::Template::SDM<SpellHandler>,
+		public RE::BSTEventSink<RE::TESSpellCastEvent>
 	{
 	public:
-		using EventResult = RE::BSEventNotifyControl;
-
-		EventResult ProcessEvent(const RE::BSAnimationGraphEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource) override;
-
-	private:
-		RE::BSFixedString _anim{ "BeginCastVoice" };
+		EventResult ProcessEvent(const RE::TESSpellCastEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESSpellCastEvent>* a_eventSource) override;
 	};
-
-
-	class PlayerLoadHandler final :
-		public DKUtil::Template::SDM<PlayerLoadHandler>,
-		public RE::BSTEventSink<RE::TESObjectLoadedEvent>
+	
+	
+	class ShoutEquipHandler final :
+		public DKUtil::Template::SDM<ShoutEquipHandler>,
+		public RE::BSTEventSink<RE::TESEquipEvent>
 	{
 	public:
-		using EventResult = RE::BSEventNotifyControl;
-
-		EventResult ProcessEvent(const RE::TESObjectLoadedEvent* a_event, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_eventSource) override;
+		EventResult ProcessEvent(const RE::TESEquipEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override;
 	};
-
-
-	bool AnimationGraphEventHandler(RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink);
 }

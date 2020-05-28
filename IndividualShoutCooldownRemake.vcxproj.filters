@@ -13,9 +13,6 @@
     <ClCompile Include="src\Settings.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Hooks.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Events.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -28,9 +25,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\version.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Hooks.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Events.h">

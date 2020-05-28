@@ -13,10 +13,12 @@ namespace
 	{
 		if (a_msg->type == SKSE::MessagingInterface::kDataLoaded) {
 			auto* source = RE::ScriptEventSourceHolder::GetSingleton();
+			
+			source->AddEventSink(Events::ShoutEquipHandler::GetSingleton());
+			_MESSAGE("Shout equip handler registered");
 
-			source->AddEventSink(Events::PlayerLoadHandler::GetSingleton());
-
-			_MESSAGE("Player load handler registered successfully");
+			source->AddEventSink(Events::SpellHandler::GetSingleton());
+			_MESSAGE("Spell cast handler registered");
 		}
 	}
 }
