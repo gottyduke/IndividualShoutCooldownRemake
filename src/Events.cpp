@@ -1,26 +1,9 @@
 #include "Events.h"
+#include "Serialization.h"
 
 
 namespace Events
 {
-	auto SpellHandler::ProcessEvent(const RE::TESSpellCastEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESSpellCastEvent>* a_eventSource)
-	-> EventResult
-	{
-		if (!a_event) {
-			return EventResult::kContinue;
-		}
-
-		auto* shout = static_cast<RE::TESShout*>(RE::TESForm::LookupByID(a_event->spellID));
-		if (!shout) {
-			return EventResult::kContinue;
-		}
-		
-		_MESSAGE(shout->GetName());
-		
-		return EventResult::kContinue;
-	}
-
-
 	auto ShoutEquipHandler::ProcessEvent(const RE::TESEquipEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource)
 	-> EventResult
 	{
@@ -28,15 +11,45 @@ namespace Events
 			return EventResult::kContinue;
 		}
 
-		auto* shout = static_cast<RE::TESShout*>(RE::TESForm::LookupByID(a_event->baseObject));
+		const auto form = a_event->baseObject;
+		auto* shout = static_cast<RE::TESShout*>(RE::TESForm::LookupByID(form));
 		if (!shout) {
 			return EventResult::kContinue;
 		}
+		
+		auto* process = RE::PlayerCharacter::GetSingleton()->currentProcess;
+		if (!process) {
+			return EventResult::kContinue;
+		}
+
+		auto* highData = process->high;
+		if (!highData) {
+			return EventResult::kContinue;
+		}
+
+		auto* calendar = RE::Calendar::GetSingleton();
+		const auto now = calendar->GetCurrentGameTime() * 3600 * 24 / calendar->GetTimescale();
+
+		auto* shoutInfo = ShoutInfo::GetSingleton();
+		auto& time = (*shoutInfo)[form];
 
 		if (a_event->equipped) {
-			// recalculate cooldown
+			float remaining;
+			
+			if (time.first == 0.0f) {
+				// first time equipping, no previous data found
+				// proceed with new cooldown
+				remaining = 0.0f;
+			} else {
+				// recalculate cooldown
+				remaining = time.second - (now - time.first);
+				remaining = remaining < 0.0f ? 0.0f : remaining;
+			}
+			
+			highData->voiceRecoveryTime = remaining;
 		} else {
-			// record cooldown
+			// write record
+			time = std::move(std::make_pair(now, highData->voiceRecoveryTime));
 		}
 		
 		return EventResult::kContinue;

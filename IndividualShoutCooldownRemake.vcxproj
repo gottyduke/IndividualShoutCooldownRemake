@@ -22,7 +22,6 @@
     <None Include="!QuickUpdate.ps1" />
     <None Include="exports.def" />
     <None Include="LICENSE" />
-    <None Include="IndividualShoutCooldownRemake.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\commonlibsse\CommonLibSSE.vcxproj">
@@ -33,12 +32,10 @@
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Serialization.cpp" />
-    <ClCompile Include="src\Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Events.h" />
     <ClInclude Include="include\Serialization.h" />
-    <ClInclude Include="include\Settings.h" />
     <ClInclude Include="include\version.h" />
   </ItemGroup>
   <ItemGroup>

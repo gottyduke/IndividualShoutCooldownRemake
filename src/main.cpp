@@ -1,8 +1,7 @@
 #include "version.h"
 
 #include "Events.h"
-#include "Hooks.h"
-#include "Settings.h"
+#include "Serialization.h"
 
 #include "SKSE/API.h"
 
@@ -16,9 +15,6 @@ namespace
 			
 			source->AddEventSink(Events::ShoutEquipHandler::GetSingleton());
 			_MESSAGE("Shout equip handler registered");
-
-			source->AddEventSink(Events::SpellHandler::GetSingleton());
-			_MESSAGE("Spell cast handler registered");
 		}
 	}
 }
@@ -63,14 +59,8 @@ extern "C"
 			return false;
 		}
 
-		if (Settings::LoadSettings()) {
-			_MESSAGE("Settings loaded successfully");
-		} else {
-			_FATALERROR("Failed to load json settings!\n");
-			return false;
-		}
 
-		const auto* const messaging = SKSE::GetMessagingInterface();
+		const auto* messaging = SKSE::GetMessagingInterface();
 		if (messaging->RegisterListener("SKSE", MessageHandler)) {
 			_MESSAGE("Messaging interface registration successful");
 		} else {
@@ -78,18 +68,12 @@ extern "C"
 			return false;
 		}
 
-		if (!SKSE::AllocTrampoline(1 << 6)) {
-			_FATALERROR("Failed to allocate trampoline");
-			return false;
-		}
-
-		if (Hooks::InstallHooks()) {
-			_MESSAGE("Hooks installed successfully");
-		} else {
-			_FATALERROR("Failed to install hooks!\n");
-			return false;
-		}
-
+		const auto* serialization = SKSE::GetSerializationInterface();
+		serialization->SetUniqueID(ShoutInfo::kHeader);
+		serialization->SetSaveCallback(ShoutInfo::SaveCallback);
+		serialization->SetLoadCallback(ShoutInfo::LoadCallback);
+		serialization->SetRevertCallback(ShoutInfo::RevertCallback);
+		
 		return true;
 	}
 };
