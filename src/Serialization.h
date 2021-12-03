@@ -1,27 +1,28 @@
 #pragma once
 
 
-#include "DKUtil/Template.hpp"
-#include "RE/Skyrim.h"
-#include "SKSE/Interfaces.h"
-
-
-class ShoutInfo final :
-	public SDM<ShoutInfo>
+class ShoutInfo
 {
 public:
-	enum : UInt32
+	enum : std::uint32_t
 	{
-		kInvalid = static_cast<UInt32>(-1),
+		kInvalid = static_cast<std::uint32_t>(-1),
 		kVersion = 1000,
 		kHeader = 'ISCR'
 	};
 
-	
-	// serialize
-	void Clear();
-	bool Save(SKSE::SerializationInterface* a_intfc, UInt32 a_version) const;
-	bool Load(SKSE::SerializationInterface* a_intfc, UInt32 a_version);
+
+	inline static ShoutInfo* GetSingleton()
+	{
+		static ShoutInfo shoutInfo;
+		return std::addressof(shoutInfo);
+	}
+
+
+	ShoutInfo(const ShoutInfo&) = delete;
+	ShoutInfo(ShoutInfo&&) = delete;
+	ShoutInfo& operator=(const ShoutInfo&) = delete;
+	ShoutInfo& operator=(ShoutInfo&&) = delete;
 
 	// callback
 	static void SaveCallback(SKSE::SerializationInterface* a_intfc);
@@ -32,6 +33,11 @@ public:
 	std::pair<float, float>& operator[](RE::FormID a_formId);
 	
 private:
-	// formId, record time, duration
+
+
+
+	// formId, <record time, duration>
 	std::unordered_map<RE::FormID, std::pair<float, float>> _data{};
+
+	ShoutInfo() = default;
 };

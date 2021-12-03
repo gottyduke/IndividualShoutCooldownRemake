@@ -1,4 +1,0 @@
-LIBRARY "ISCR"
-EXPORTS
-SKSEPlugin_Query
-SKSEPlugin_Load

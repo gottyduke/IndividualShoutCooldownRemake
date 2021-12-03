@@ -1,9 +1,5 @@
-#include "version.h"
-
 #include "Events.h"
 #include "Serialization.h"
-
-#include "SKSE/API.h"
 
 
 namespace
@@ -12,68 +8,87 @@ namespace
 	{
 		if (a_msg->type == SKSE::MessagingInterface::kDataLoaded) {
 			auto* source = RE::ScriptEventSourceHolder::GetSingleton();
-			
+
 			source->AddEventSink(Events::ShoutEquipHandler::GetSingleton());
-			_MESSAGE("Shout equip handler registered");
+			INFO("Shout equip handler registered"sv);
 		}
 	}
 }
 
 
-extern "C"
+#if ANNIVERSARY_EDITION
+
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 {
-	bool SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-	{
-		SKSE::Logger::OpenRelative(FOLDERID_Documents, L"\\My Games\\Skyrim Special Edition\\SKSE\\IndividualShoutCooldownRemake.log");
-		SKSE::Logger::UseLogStamp(true);
-		SKSE::Logger::SetPrintLevel(SKSE::Logger::Level::kDebugMessage);
-		SKSE::Logger::SetFlushLevel(SKSE::Logger::Level::kDebugMessage);
-		SKSE::Logger::TrackTrampolineStats(true);
+	SKSE::PluginVersionData data{};
 
-		_MESSAGE("IndividualShoutCooldownRemake v%s", ISCR_VERSION_VERSTRING);
+	data.PluginVersion(Version::MAJOR);
+	data.PluginName(Version::NAME);
+	data.AuthorName("Dropkicker"sv);
 
-		a_info->infoVersion = SKSE::PluginInfo::kVersion;
-		a_info->name = "ISCR";
-		a_info->version = ISCR_VERSION_MAJOR;
+	data.CompatibleVersions({ SKSE::RUNTIME_LATEST });
+	data.UsesAddressLibrary(true);
 
-		if (a_skse->IsEditor()) {
-			_FATALERROR("Loaded in editor, marking as incompatible!\n");
-			return false;
-		}
+	return data;
+}();
 
-		const auto ver = a_skse->RuntimeVersion();
-		if (ver <= SKSE::RUNTIME_1_5_39) {
-			_FATALERROR("Unsupported runtime version %s!", ver.GetString().c_str());
-			return false;
-		}
+#else
 
-		return true;
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+{
+	DKUtil::Logger::Init(Version::PROJECT, Version::NAME);
+
+	a_info->infoVersion = SKSE::PluginInfo::kVersion;
+	a_info->name = Version::PROJECT.data();
+	a_info->version = Version::MAJOR;
+
+	if (a_skse->IsEditor()) {
+		ERROR("Loaded in editor, marking as incompatible"sv);
+		return false;
 	}
 
-
-	bool SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
-	{
-		_MESSAGE("IndividualShoutCooldownRemake loaded");
-
-		if (!Init(a_skse)) {
-			return false;
-		}
-
-
-		const auto* messaging = SKSE::GetMessagingInterface();
-		if (messaging->RegisterListener("SKSE", MessageHandler)) {
-			_MESSAGE("Messaging interface registration successful");
-		} else {
-			_FATALERROR("Messaging interface registration failed!\n");
-			return false;
-		}
-
-		const auto* serialization = SKSE::GetSerializationInterface();
-		serialization->SetUniqueID(ShoutInfo::kHeader);
-		serialization->SetSaveCallback(ShoutInfo::SaveCallback);
-		serialization->SetLoadCallback(ShoutInfo::LoadCallback);
-		serialization->SetRevertCallback(ShoutInfo::RevertCallback);
-		
-		return true;
+	const auto ver = a_skse->RuntimeVersion();
+	if (ver < SKSE::RUNTIME_1_5_39) {
+		ERROR("Unable to load this plugin, incompatible runtime version!\nExpected: Newer than 1-5-39-0 (A.K.A Special Edition)\nDetected: {}", ver.string());
+		return false;
 	}
-};
+
+	return true;
+}
+
+#endif
+
+
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+{
+#if ANNIVERSARY_EDITION
+
+	DKUtil::Logger::Init(Version::PROJECT, Version::NAME);
+
+	if (REL::Module::get().version() < SKSE::RUNTIME_1_6_317) {
+		ERROR("Unable to load this plugin, incompatible runtime version!\nExpected: Newer than 1-6-317-0 (A.K.A Anniversary Edition)\nDetected: {}", REL::Module::get().version().string());
+		return false;
+	}
+
+#endif
+
+	INFO("{} v{} loaded", Version::PROJECT, Version::NAME);
+
+	SKSE::Init(a_skse);
+
+	const auto* messaging = SKSE::GetMessagingInterface();
+	if (messaging->RegisterListener("SKSE", MessageHandler)) {
+		INFO("Messaging interface registration successful"sv);
+	} else {
+		ERROR("Messaging interface registration failed!"sv);
+		return false;
+	}
+
+	const auto* serialization = SKSE::GetSerializationInterface();
+	serialization->SetUniqueID(ShoutInfo::kHeader);
+	serialization->SetSaveCallback(ShoutInfo::SaveCallback);
+	serialization->SetLoadCallback(ShoutInfo::LoadCallback);
+	serialization->SetRevertCallback(ShoutInfo::RevertCallback);
+
+	return true;
+}
