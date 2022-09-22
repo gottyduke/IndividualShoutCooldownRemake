@@ -16,8 +16,13 @@ namespace Events
 		if (!shout) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		
-		auto* process = RE::PlayerCharacter::GetSingleton()->currentProcess;
+		auto* player = RE::PlayerCharacter::GetSingleton();
+		if (!player) {
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+		auto& runtimeData = player->GetActorRuntimeData();
+		auto* process = runtimeData.currentProcess;
 		if (!process) {
 			return RE::BSEventNotifyControl::kContinue;
 		}

@@ -1,13 +1,14 @@
 {
-    "name":  "IndividualShoutCooldownRemake",
-    "version-string":  "1.0.0",
-    "description":  "An SKSE plugin managing all shout cooldown separately",
-    "license":  "MIT",
-    "dependencies":  [
-                         "spdlog"
-                     ],
-    "script-version":  "11203",
-    "build-config":  "MD",
-    "build-target":  "AE",
-    "install-name":  "IndividualShoutCooldownRemake"
+    "name": "individualshoutcooldownremake",
+    "version-string": "1.0.2",
+    "description": "An SKSE plugin managing all shout cooldown separately",
+    "license": "MIT",
+    "dependencies": [
+        "spdlog"
+    ],
+    "features": {
+        "mo2-install": {
+            "description": "IndividualShoutCooldownRemake"
+        }
+    }
 }
